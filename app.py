@@ -38,17 +38,17 @@ def send_message(user_id, text):
         print("Ошибка при отправке:", e)
 
 def get_song_result(task_id):
-    """Проверка готовности песни по taskId"""
+    """Проверка готовности песни по taskId (до 3 минут)"""
     url = f"https://api.sunoapi.org/api/v1/result/{task_id}"
     headers = {"Authorization": f"Bearer {SUNO_API_KEY}"}
 
-    for i in range(30):  # проверяем до 30 раз
+    for i in range(60):  # 60 попыток
         r = requests.get(url, headers=headers)
         if r.status_code == 200:
             data = r.json()
             if data.get("data") and data["data"].get("audioUrl"):
                 return data["data"]["audioUrl"]
-        time.sleep(2)  # ждём 2 секунды
+        time.sleep(3)  # ждем 3 секунды
     return None
 
 def generate_song(prompt):
@@ -65,6 +65,9 @@ def generate_song(prompt):
         "prompt": prompt,
         "style": "Pop",
         "title": "Generated Song",
+        "personaId": "",
+        "personaModel": "",
+        "negativeTags": "",
         "vocalGender": "m",
         "styleWeight": 0.65,
         "weirdnessConstraint": 0.65,
@@ -86,16 +89,13 @@ def main():
     if "type" not in data:
         return "ok"
 
-    # Подтверждение сервера
     if data["type"] == "confirmation":
         return CONFIRMATION_TOKEN
 
-    # Новое сообщение
     if data["type"] == "message_new":
         user_id = data["object"]["message"]["from_id"]
         text = data["object"]["message"]["text"].strip()
 
-        # Инициализация пользователя
         if user_id not in users:
             users[user_id] = {"step": 0, "answers": []}
             send_message(user_id, "Привет! Давай создадим твою песню 🎶")
@@ -103,18 +103,14 @@ def main():
             return "ok"
 
         user_state = users[user_id]
-
-        # Сохраняем ответ
         user_state["answers"].append(text)
         user_state["step"] += 1
 
-        # Следующий вопрос
         if user_state["step"] < len(questions):
             send_message(user_id, questions[user_state["step"]])
         else:
-            # Все ответы собраны, формируем промт
             prompt = " | ".join(user_state["answers"])
-            send_message(user_id, "⏳ Генерирую песню, это займёт ~30–60 секунд...")
+            send_message(user_id, "⏳ Генерирую песню, это займёт ~1–3 минуты...")
 
             song_url = generate_song(prompt)
             if song_url:
@@ -122,7 +118,6 @@ def main():
             else:
                 send_message(user_id, "❌ Ошибка при генерации песни. Попробуй ещё раз.")
 
-            # Сбрасываем состояние пользователя
             users.pop(user_id)
 
         return "ok"

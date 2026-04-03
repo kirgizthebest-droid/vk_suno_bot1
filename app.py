@@ -3,6 +3,7 @@ import vk_api
 from vk_api.utils import get_random_id
 import requests
 import os
+import time
 
 app = Flask(__name__)
 
@@ -36,6 +37,21 @@ def send_message(user_id, text):
     except Exception as e:
         print("Ошибка при отправке:", e)
 
+# Функция для проверки результата задачи Suno
+def get_song_result(task_id):
+    url = f"https://api.sunoapi.org/api/v1/result/{task_id}"
+    headers = {"Authorization": f"Bearer {SUNO_API_KEY}"}
+    
+    for i in range(30):  # проверяем до 30 раз
+        r = requests.get(url, headers=headers)
+        if r.status_code == 200:
+            data = r.json()
+            if data.get("data") and data["data"].get("audioUrl"):
+                return data["data"]["audioUrl"]
+        time.sleep(2)  # ждем 2 секунды перед следующей проверкой
+    return None
+
+# Функция генерации песни
 def generate_song(prompt):
     url = "https://api.sunoapi.org/api/v1/generate"
     headers = {
@@ -54,14 +70,14 @@ def generate_song(prompt):
         "weirdnessConstraint": 0.65,
         "audioWeight": 0.65
     }
+    
     try:
+        # Отправка задачи на генерацию
         response = requests.post(url, json=data, headers=headers)
         response.raise_for_status()
-        result = response.json()
-        audio_url = result.get("audio_url")
-        if not audio_url:
-            print("Ошибка Suno: нет audio_url в ответе", result)
-        return audio_url
+        task_id = response.json()["data"]["taskId"]
+        # Получаем результат
+        return get_song_result(task_id)
     except Exception as e:
         print("Ошибка Suno:", e)
         return None

@@ -7,9 +7,9 @@ import os
 app = Flask(__name__)
 
 # ===== Вставь свои ключи =====
-VK_TOKEN = "ТВОЙ_VK_TOKEN_СООБЩЕСТВА"
-SUNO_API_KEY = "9dec725e81722672da26a15c574ee8bf"
-CONFIRMATION_TOKEN = "b34ed879"
+VK_TOKEN = "vk1.a.yHRjlGZz32DpRfH6EP9s3_pFOC12x8Rr_JvuAIpKW2Y4P8A5G1bJKr5qYLr_4CAxC7-gDTKFcoKaXtWLf9iPek82vvVB8AbxJkSBbvCwIzNfnxQBJk8acUjmzLdp79SFGsfY0g3CHAYVTtA3VRruyU9WrnA-3evntzrjUBeD2l06EQ1YRk2FrhwCtKfJPCGPiBaGu_kkhInzT7NWRF-Zig"
+SUNO_API_KEY = "1b9544b2a524d363c7ad40babfcf058e"
+CONFIRMATION_TOKEN = "e8f8753e"
 # ============================
 
 vk_session = vk_api.VkApi(token=VK_TOKEN)

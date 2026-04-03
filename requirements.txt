@@ -1,4 +1,4 @@
-flask
-vk_api
-requests
-gunicorn
+Flask==2.3.4
+vk_api==11.9.2
+requests==2.32.0
+gunicorn==25.3.0

@@ -6,26 +6,24 @@ import os
 
 app = Flask(__name__)
 
-# ===== ВАЖНО: вставь свои ключи =====
-VK_TOKEN = "vk1.a.yHRjlGZz32DpRfH6EP9s3_pFOC12x8Rr_JvuAIpKW2Y4P8A5G1bJKr5qYLr_4CAxC7-gDTKFcoKaXtWLf9iPek82vvVB8AbxJkSBbvCwIzNfnxQBJk8acUjmzLdp79SFGsfY0g3CHAYVTtA3VRruyU9WrnA-3evntzrjUBeD2l06EQ1YRk2FrhwCtKfJPCGPiBaGu_kkhInzT7NWRF-Zig"
-SUNO_API_KEY = "1b9544b2a524d363c7ad40babfcf058e"
-CONFIRMATION_TOKEN = "e8f8753e"
-# ====================================
+# ===== Вставь свои ключи =====
+VK_TOKEN = "ТВОЙ_VK_TOKEN_СООБЩЕСТВА"
+SUNO_API_KEY = "9dec725e81722672da26a15c574ee8bf"
+CONFIRMATION_TOKEN = "b34ed879"
+# ============================
 
 vk_session = vk_api.VkApi(token=VK_TOKEN)
 vk = vk_session.get_api()
 
-# Список вопросов для генерации промта
 questions = [
-    "🎵 Какой стиль музыки? (рэп, поп, рок)",
+    "🎵 Какой стиль музыки? (рэп, поп, рок, классика)",
     "📝 О чём песня?",
     "👤 Для кого песня?",
     "😎 Какое настроение песни?",
     "💬 Добавить конкретные слова или имя?"
 ]
 
-# Состояние пользователей
-users = {}
+users = {}  # состояние пользователей
 
 def send_message(user_id, text):
     try:
@@ -44,12 +42,26 @@ def generate_song(prompt):
         "Authorization": f"Bearer {SUNO_API_KEY}",
         "Content-Type": "application/json"
     }
-    data = {"prompt": prompt, "voice": "default"}
+    data = {
+        "customMode": True,
+        "instrumental": True,
+        "model": "V4_5ALL",
+        "prompt": prompt,
+        "style": "Pop",
+        "title": "Generated Song",
+        "vocalGender": "m",
+        "styleWeight": 0.65,
+        "weirdnessConstraint": 0.65,
+        "audioWeight": 0.65
+    }
     try:
         response = requests.post(url, json=data, headers=headers)
         response.raise_for_status()
         result = response.json()
-        return result.get("audio_url")
+        audio_url = result.get("audio_url")
+        if not audio_url:
+            print("Ошибка Suno: нет audio_url в ответе", result)
+        return audio_url
     except Exception as e:
         print("Ошибка Suno:", e)
         return None
@@ -104,5 +116,4 @@ def main():
     return "ok"
 
 if __name__ == "__main__":
-    # Для локального теста, на Render лучше Start Command через gunicorn
     app.run(host="0.0.0.0", port=10000)

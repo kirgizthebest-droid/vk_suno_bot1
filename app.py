@@ -37,11 +37,11 @@ def send_message(user_id, text):
     except Exception as e:
         print("Ошибка при отправке:", e)
 
-# Проверка готовности песни по taskId
 def get_song_result(task_id):
+    """Проверка готовности песни по taskId"""
     url = f"https://api.sunoapi.org/api/v1/result/{task_id}"
     headers = {"Authorization": f"Bearer {SUNO_API_KEY}"}
-    
+
     for i in range(30):  # проверяем до 30 раз
         r = requests.get(url, headers=headers)
         if r.status_code == 200:
@@ -51,8 +51,8 @@ def get_song_result(task_id):
         time.sleep(2)  # ждём 2 секунды
     return None
 
-# Генерация песни
 def generate_song(prompt):
+    """Отправка промта в Suno и получение audioUrl"""
     url = "https://api.sunoapi.org/api/v1/generate"
     headers = {
         "Authorization": f"Bearer {SUNO_API_KEY}",
@@ -70,7 +70,7 @@ def generate_song(prompt):
         "weirdnessConstraint": 0.65,
         "audioWeight": 0.65
     }
-    
+
     try:
         response = requests.post(url, json=data, headers=headers)
         response.raise_for_status()
@@ -127,10 +127,6 @@ def main():
 
         return "ok"
 
-    return "ok"
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
     return "ok"
 
 if __name__ == "__main__":
